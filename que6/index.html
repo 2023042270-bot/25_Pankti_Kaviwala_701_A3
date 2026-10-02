@@ -1,0 +1,26 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Weather App</title>
+</head>
+<body>
+    <h2>Weather Information</h2>
+
+    <button onclick="getWeather()">Get Weather</button>
+    <p id="result"></p>
+
+    <script>
+        function getWeather() {
+            fetch("https://dummyjson.com/products")
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("result").innerHTML =
+                        "Temperature: " + data.current.temperature_2m + " °C<br>" +
+                        "Humidity: " + data.current.relative_humidity_2m + "%";
+                })
+                .catch(err => console.log(err));
+        }
+    </script>
+</body>
+</html>
