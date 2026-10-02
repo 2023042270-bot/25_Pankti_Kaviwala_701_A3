@@ -1,149 +1,75 @@
-// const express=require("express");
-// const app=express();
+//session storing in file using 2 authenticated routes for application
 
-// app.use(express.static("static"));
+const express=require("express")
+const app=express()
+const port=4000
+const session=require("express-session")
+const file=require("session-file-store")(session)
 
-// app.use(express.urlencoded({extended:false}))
+app.set("view engine","ejs")
+app.use(express.urlencoded({extended:true}))
 
-// app.listen(8000,()=>{
-//     console.log("Listening at 8000 port..")
-// })
+//session configuration
 
-// app.use("/",(req,res,next)=>{
-//     console.log(req.method + " " + req.url + " Requested");
-//     next();
-// })
-
-// app.get("/",(req,res)=>{
-//     res.send("Hello Express!!")
-// })
-
-// app.get("/page1",(req,res)=>{
-//     res.send("Page1")
-// })
-
-// app.get("/page2",(req,res)=>{
-//     res.send("Page2")
-// })
-
-const express = require("express");
-const session = require("express-session");
-const FileStore = require("session-file-store")(session);
-
-const app = express();
-const PORT = 3000;
-
-// Middleware
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-// Session configuration
-app.use(
-  session({
-    store: new FileStore({
-      path: "./sessions",
-      retries: 0,
+app.use(session({
+    store:new file({
+        path:"./sessions"
     }),
-    secret: "my-secret-key",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      maxAge: 1000 * 60 * 30, // 30 minutes
-      httpOnly: true,
-    },
-  })
-);
+    secret:"my-key",
+    resave:false,
+    saveUninitialized:false,
+    cookie:{
+        maxAge:1000*60*30
+    }
+}))
 
-// Login page
-app.get("/", (req, res) => {
-  res.send(`
-    <h1>Login</h1>
+app.get("/test",(req,res)=>{
+    res.render("test")//test.ejs will execute
+})
 
-    <form method="POST" action="/login">
-      <input
-        type="text"
-        name="username"
-        placeholder="Username"
-        required
-      />
+app.get("/",(req,res)=>{
+    res.render("login")
+})
 
-      <input
-        type="password"
-        name="password"
-        placeholder="Password"
-        required
-      />
+app.post("/login",(req,res)=>{
+    const {name,password}=req.body
 
-      <button type="submit">Login</button>
-    </form>
-  `);
-});
+    if(name==="admin"&&password==="1234")
+    {
+        req.session.user=name
+        res.redirect("/dashboard")
+    }
+    else{
+        res.send("Invalid username and password")
+    }
+})
 
-// Login
-app.post("/login", (req, res) => {
-  const { username, password } = req.body;
+//create middleware
 
-  // Demo credentials
-  if (username === "admin" && password === "1234") {
-    req.session.user = {
-      username: username,
-    };
-
-    return res.redirect("/dashboard");
-  }
-
-  res.status(401).send("Invalid username or password");
-});
-
-// Authentication middleware
-function isAuthenticated(req, res, next) {
-  if (req.session.user) {
-    return next();
-  }
-
-  res.status(401).send(`
-    <h2>Unauthorized</h2>
-    <p>Please login first.</p>
-    <a href="/">Login</a>
-  `);
+function authMidd(req,res,next){
+    if(req.session.user){
+        next()
+    }
+    else{
+        res.send("Not authenticated")
+    }
 }
 
-// Protected Route 1
-app.get("/dashboard", isAuthenticated, (req, res) => {
-  res.send(`
-    <h1>Dashboard</h1>
-    <p>Welcome, ${req.session.user.username}!</p>
+app.get("/dashboard",authMidd,(req,res)=>{
+    res.render("dashboard",{
+        name:req.session.user
+    })
+})
 
-    <a href="/profile">Profile</a>
-    <br />
-    <a href="/logout">Logout</a>
-  `);
-});
+app.get("/logout",(req,res)=>{
+    req.session.destroy((err)=>{
+        if(err){
+            return res.send("Error in logout")
+        }
+        res.redirect("/")
+    })
+})
 
-// Protected Route 2
-app.get("/profile", isAuthenticated, (req, res) => {
-  res.send(`
-    <h1>Profile</h1>
-    <p>Username: ${req.session.user.username}</p>
-
-    <a href="/dashboard">Dashboard</a>
-    <br />
-    <a href="/logout">Logout</a>
-  `);
-});
-
-// Logout
-app.get("/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).send("Could not log out");
-    }
-
-    res.redirect("/");
-  });
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
-});
+app.listen(port,()=>{
+    console.log("running on ",port)
+})
