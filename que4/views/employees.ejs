@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee List</title>
+</head>
+<body>
+    <h1>Employee Management</h1>
+
+    <% if (typeof message !== "undefined") { %>
+        <p><%= message %></p>
+    <% } %>
+
+    <a href="/dashboard">Dashboard</a> |
+    <a href="/employees/add">Add Employee</a>
+
+    <br><br>
+
+    <table border="1" cellpadding="8" cellspacing="0">
+        <thead>
+            <tr>
+                <th>Employee ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Department</th>
+                <th>Basic Salary</th>
+                <th>HRA</th>
+                <th>DA</th>
+                <th>PF</th>
+                <th>Gross Salary</th>
+                <th>Net Salary</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            <% employees.forEach(function(emp) { %>
+                <tr>
+                    <td><%= emp.empid %></td>
+                    <td><%= emp.name %></td>
+                    <td><%= emp.email %></td>
+                    <td><%= emp.department %></td>
+                    <td><%= emp.basicSalary.toFixed(2) %></td>
+                    <td><%= emp.hra.toFixed(2) %></td>
+                    <td><%= emp.da.toFixed(2) %></td>
+                    <td><%= emp.pf.toFixed(2) %></td>
+                    <td><%= emp.grossSalary.toFixed(2) %></td>
+                    <td><%= emp.netSalary.toFixed(2) %></td>
+
+                    <td>
+                        <a href="/employees/edit/<%= emp._id %>">
+                            Edit
+                        </a>
+
+                        <form
+                            action="/employees/delete/<%= emp._id %>"
+                            method="POST"
+                            style="display:inline"
+                            onsubmit="return confirm('Delete this employee?')">
+
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+
+    <br>
+
+    <form action="/logout" method="POST">
+        <button type="submit">Logout</button>
+    </form>
+</body>
+</html>

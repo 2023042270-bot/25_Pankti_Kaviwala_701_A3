@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Employee</title>
+</head>
+<body>
+    <h2>Edit Employee</h2>
+
+    <% if (error) { %>
+        <p style="color:red"><%= error %></p>
+    <% } %>
+
+    <form
+        action="/employees/edit/<%= employee._id %>"
+        method="POST">
+
+        <label>Employee ID:</label>
+        <input type="text" value="<%= employee.empid %>" disabled>
+        <br><br>
+
+        <label>Name:</label>
+        <input type="text" name="name"
+               value="<%= employee.name %>" required>
+        <br><br>
+
+        <label>Email:</label>
+        <input type="email" name="email"
+               value="<%= employee.email %>" required>
+        <br><br>
+
+        <label>Department:</label>
+        <input type="text" name="department"
+               value="<%= employee.department %>" required>
+        <br><br>
+
+        <label>Basic Salary:</label>
+        <input type="number" name="basicSalary"
+               value="<%= employee.basicSalary %>"
+               min="1" step="0.01" required>
+        <br><br>
+
+        <button type="submit">Update Employee</button>
+    </form>
+
+    <br>
+    <a href="/employees">Back to Employees</a>
+</body>
+</html>
